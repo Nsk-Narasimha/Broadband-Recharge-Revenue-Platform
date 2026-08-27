@@ -292,7 +292,7 @@ sent_at
 
 The project contains 100 SQL practice and analysis queries divided into three levels.
 
-🟢 Simple Queries — 1–35
+🟢 Simple Queries
 
 Basic SQL operations:
 
@@ -333,7 +333,7 @@ SELECT
 FROM plans
 WHERE price > 500;
 
-🟡 Medium Queries — 36–70
+🟡 Medium Queries
 
 Intermediate relational analysis using:
 
@@ -372,7 +372,7 @@ JOIN transactions t
 WHERE t.status = 'Success'
 GROUP BY c.id, c.name;
 
-🔴 Hard Queries — 71–100
+🔴 Hard Queries
 
 Advanced SQL analysis using:
 
