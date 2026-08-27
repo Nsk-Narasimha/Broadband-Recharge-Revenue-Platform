@@ -1,92 +1,53 @@
 # Broadband-Recharge📡 Broadband Database — SQL Data Analysis Project
 
-📌 Project Overview
+#📌 Project Overview
 
 Broadband Database is a MySQL-based database project designed to manage and analyze broadband/internet service provider data.
 
 The project stores information about:
 
-Customers
-
-Broadband plans
-
-Customer accounts/users
-
-Internet usage
-
-Payments and transactions
-
-Password reset requests
-
-Renewal alerts
+  Customers
+  Broadband plans
+  Customer accounts/users
+  Internet usage
+  Payments and transactions
+  Password reset requests
+  Renewal alerts
 
 The main purpose of this project is to practice SQL database design, relationships, data retrieval, aggregation, joins, subqueries, and advanced data analysis using a realistic broadband-service scenario.
 
-🎯 Objectives
+#🎯 Objectives
 
 The project focuses on:
 
-Designing a relational database using MySQL.
+  Designing a relational database using MySQL.
+  Creating multiple related tables.
+  Establishing Primary Key and Foreign Key relationships.
+  Inserting realistic broadband customer data.
+  Retrieving and filtering data using SQL.
+  Performing customer and revenue analysis.
+  Analyzing internet usage.
+  Analyzing successful and failed payments.
+  Practicing JOIN, GROUP BY, HAVING, and subqueries.  
+  Applying advanced SQL concepts such as CTEs and Window Functions.
 
-Creating multiple related tables.
+#🗄️ Database Structure
 
-Establishing Primary Key and Foreign Key relationships.
-
-Inserting realistic broadband customer data.
-
-Retrieving and filtering data using SQL.
-
-Performing customer and revenue analysis.
-
-Analyzing internet usage.
-
-Analyzing successful and failed payments.
-
-Practicing JOIN, GROUP BY, HAVING, and subqueries.
-
-Applying advanced SQL concepts such as CTEs and Window Functions.
-
-🗄️ Database Structure
-
-Database name:
-
-broadband_db
-
+Database name: broadband_db
+  
 The project contains 7 tables:
 
-Table
+Table:      Purpose
 
-Purpose
+plans       : Stores broadband plan information
+customers   : Stores customer information
+users       : Stores login/user information
+usage_logs  : Stores customer data consumption
+transactions : Stores payment transactions
+password_resets : Stores password reset information
+renewal_alert_logs :Stores renewal notification records
 
-plans
-
-Stores broadband plan information
-
-customers
-
-Stores customer information
-
-users
-
-Stores login/user information
-
-usage_logs
-
-Stores customer data consumption
-
-transactions
-
-Stores payment transactions
-
-password_resets
-
-Stores password reset information
-
-renewal_alert_logs
-
-Stores renewal notification records
-
-🔗 Database Relationships
+#🔗 Database Relationships
 
                     ┌──────────────┐
                     │    plans     │
@@ -114,50 +75,43 @@ Stores renewal notification records
               ▼
             plans
 
-Primary relationships
-
+#Primary relationships
+1.
 customers.plan_id
-        ↓
+          ↓
 plans.id
-
+2.
 users.customer_id
         ↓
 customers.id
-
+3.
 usage_logs.customer_id
         ↓
 customers.id
-
+4.
 transactions.customer_id
         ↓
 customers.id
-
+5.
 transactions.plan_id
         ↓
 plans.id
-
+6.
 renewal_alert_logs.customer_id
         ↓
 customers.id
 
-🛠️ Technologies Used
+#🛠️ Technologies Used
 
 Database: MySQL
-
 Language: SQL
-
 Tool: MySQL Workbench / MySQL CLI
-
 Database Type: Relational Database
 
-📂 Table Details
+#📂 Table Details
 
-1. plans
-
-Stores available broadband plans.
-
+1. plans-Stores available broadband plans.
 Important columns:
-
 id
 name
 speed
@@ -169,18 +123,12 @@ price
 Example plans include:
 
 Home Basic
-
 Home Plus
-
 Home Pro Unlimited
-
 Home Gamer Ultra
-
 Home Starter
 
-2. customers
-
-Stores broadband customer details.
+2. customers-Stores broadband customer details.
 
 Important columns:
 
@@ -196,9 +144,7 @@ followed_up
 
 plan_id connects each customer to a broadband plan.
 
-3. users
-
-Stores system users and customer login information.
+3. users-Stores system users and customer login information.
 
 Important columns:
 
@@ -216,9 +162,7 @@ admin
 staff
 customer
 
-4. usage_logs
-
-Stores customer internet usage.
+4. usage_logs-Stores customer internet usage.
 
 Important columns:
 
@@ -230,18 +174,12 @@ data_consumed
 This table can be used to calculate:
 
 Total data consumption
-
 Average usage
-
 Maximum usage
-
 Minimum usage
-
 Usage by customer
 
-5. transactions
-
-Stores payment information.
+5. transactions-Stores payment information.
 
 Important columns:
 
@@ -264,9 +202,7 @@ Transaction statuses include:
 Success
 Failed
 
-6. password_resets
-
-Stores password reset information.
+6. password_resets-Stores password reset information.
 
 Columns include:
 
@@ -276,9 +212,7 @@ otp
 created_at
 expires_at
 
-7. renewal_alert_logs
-
-Stores renewal alert information.
+7. renewal_alert_logs-Stores renewal alert information.
 
 Columns include:
 
@@ -288,34 +222,24 @@ due_date
 alert_type
 sent_at
 
-📊 SQL Analysis Performed
+#📊 SQL Analysis Performed
 
 The project contains 100 SQL practice and analysis queries divided into three levels.
 
-🟢 Simple Queries
+#🟢 Simple Queries
 
 Basic SQL operations:
 
 SELECT
-
 WHERE
-
 LIKE
-
 BETWEEN
-
 ORDER BY
-
 LIMIT
-
 COUNT()
-
 SUM()
-
 AVG()
-
 MIN()
-
 MAX()
 
 Example:
@@ -333,22 +257,16 @@ SELECT
 FROM plans
 WHERE price > 500;
 
-🟡 Medium Queries
+#🟡 Medium Queries
 
 Intermediate relational analysis using:
 
 INNER JOIN
-
 LEFT JOIN
-
 GROUP BY
-
 HAVING
-
 Aggregate functions
-
 Subqueries
-
 Multiple-table relationships
 
 Example:
@@ -372,24 +290,17 @@ JOIN transactions t
 WHERE t.status = 'Success'
 GROUP BY c.id, c.name;
 
-🔴 Hard Queries
+#🔴 Hard Queries
 
 Advanced SQL analysis using:
 
 Nested subqueries
-
 CTEs
-
 CASE
-
 Window functions
-
 RANK()
-
 PARTITION BY
-
 Complex aggregations
-
 Business intelligence queries
 
 Example:
@@ -411,37 +322,24 @@ FROM (
     GROUP BY c.id, c.name
 ) x;
 
-💼 Business Questions Answered
+#💼 Business Questions Answered
 
 The SQL analysis can answer questions such as:
-
 Which customer generates the highest revenue?
-
 Which broadband plan is most popular?
-
 Which plan generates the highest revenue?
-
 Which customers have failed payments?
-
 Which customers consume the most data?
-
 Which customers have no transactions?
-
 Which payment mode is used most frequently?
-
 What is the monthly revenue?
-
 Which customers consume more than 80% of their plan limit?
-
 Which customers use multiple payment methods?
-
 Which plan has no customers?
-
 Who are the highest-revenue customers within each plan?
-
 Which customers need renewal soon?
 
-📈 Key SQL Concepts Demonstrated
+#📈 Key SQL Concepts Demonstrated
 
 Basic SQL
 
@@ -476,12 +374,11 @@ RANK()
 PARTITION BY
 Window Functions
 
-🚀 How to Run the Project
+#🚀 How to Run the Project
 
 Step 1 — Install MySQL
 
 Install:
-
 MySQL Server
 
 MySQL Workbench
@@ -505,17 +402,17 @@ Step 4 — Create the tables
 Execute the CREATE TABLE statements in dependency order:
 
 plans
-↓
+  ↓
 customers
-↓
+  ↓
 users
-↓
+  ↓
 usage_logs
-↓
+  ↓
 transactions
-↓
+  ↓
 password_resets
-↓
+  ↓
 renewal_alert_logs
 
 Step 5 — Insert the data
@@ -552,7 +449,7 @@ Simple   → 1–35
 Medium   → 36–70
 Hard     → 71–100
 
-📁 Suggested GitHub Structure
+#📁 Suggested GitHub Structure
 
 broadband-database-sql/
 │
@@ -572,59 +469,39 @@ broadband-database-sql/
 ├── README.md
 └── broadband_db.sql
 
-🎓 Learning Outcomes
+#🎓 Learning Outcomes
 
 After completing this project, the major skills practiced are:
 
 Relational database design
-
 Primary and foreign keys
-
 One-to-many relationships
-
 SQL CRUD fundamentals
-
 Filtering and sorting
-
 Aggregate functions
-
 Table joins
-
 Grouped analysis
-
 Subqueries
-
 CTEs
-
 Window functions
-
 Revenue analysis
-
 Customer analysis
-
 Usage analysis
-
 Payment analysis
-
 Business-oriented SQL problem solving
 
-🔮 Possible Future Improvements
+#🔮 Possible Future Improvements
 
 The database could be extended with:
 
 Support tickets — track customer complaints.
-
 Service outages — analyze downtime by customer/area.
-
 Employee table — manage staff separately.
-
 Plan upgrade history — track customers changing plans.
-
 Monthly billing table — maintain generated invoices.
-
 Location/area table — analyze customers geographically.
 
-👨‍💻 Project Summary
+#👨‍💻 Project Summary
 
 Broadband Database SQL Project is a relational MySQL project that models a broadband service provider and provides a practical environment for SQL analysis.
 
@@ -632,7 +509,7 @@ It combines customer management, broadband plans, usage tracking, payment transa
 
 The project progresses from basic SQL queries to advanced analytical queries, making it suitable for practicing SQL for Data Analyst, Python Full-Stack, and database-focused interviews.
 
-⭐ Skills Demonstrated
+#⭐ Skills Demonstrated
 
 MySQL
 SQL
