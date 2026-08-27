@@ -1,6 +1,6 @@
 # Broadband-Recharge📡 Broadband Database — SQL Data Analysis Project
 
-#📌 Project Overview
+# 📌 Project Overview
 
 Broadband Database is a MySQL-based database project designed to manage and analyze broadband/internet service provider data.
 
@@ -16,7 +16,7 @@ The project stores information about:
 
 The main purpose of this project is to practice SQL database design, relationships, data retrieval, aggregation, joins, subqueries, and advanced data analysis using a realistic broadband-service scenario.
 
-#🎯 Objectives
+# 🎯 Objectives
 
 The project focuses on:
 
@@ -31,7 +31,7 @@ The project focuses on:
   Practicing JOIN, GROUP BY, HAVING, and subqueries.  
   Applying advanced SQL concepts such as CTEs and Window Functions.
 
-#🗄️ Database Structure
+# 🗄️ Database Structure
 
 Database name: broadband_db
   
@@ -47,7 +47,7 @@ transactions : Stores payment transactions
 password_resets : Stores password reset information
 renewal_alert_logs :Stores renewal notification records
 
-#🔗 Database Relationships
+# 🔗 Database Relationships
 
                     ┌──────────────┐
                     │    plans     │
@@ -75,7 +75,7 @@ renewal_alert_logs :Stores renewal notification records
               ▼
             plans
 
-#Primary relationships
+# Primary relationships
 1.
 customers.plan_id
           ↓
@@ -101,14 +101,14 @@ renewal_alert_logs.customer_id
         ↓
 customers.id
 
-#🛠️ Technologies Used
+# 🛠️ Technologies Used
 
 Database: MySQL
 Language: SQL
 Tool: MySQL Workbench / MySQL CLI
 Database Type: Relational Database
 
-#📂 Table Details
+# 📂 Table Details
 
 1. plans-Stores available broadband plans.
 Important columns:
@@ -222,11 +222,11 @@ due_date
 alert_type
 sent_at
 
-#📊 SQL Analysis Performed
+# 📊 SQL Analysis Performed
 
 The project contains 100 SQL practice and analysis queries divided into three levels.
 
-#🟢 Simple Queries
+# 🟢 Simple Queries
 
 Basic SQL operations:
 
@@ -257,7 +257,7 @@ SELECT
 FROM plans
 WHERE price > 500;
 
-#🟡 Medium Queries
+# 🟡 Medium Queries
 
 Intermediate relational analysis using:
 
@@ -290,7 +290,7 @@ JOIN transactions t
 WHERE t.status = 'Success'
 GROUP BY c.id, c.name;
 
-#🔴 Hard Queries
+# 🔴 Hard Queries
 
 Advanced SQL analysis using:
 
@@ -322,7 +322,7 @@ FROM (
     GROUP BY c.id, c.name
 ) x;
 
-#💼 Business Questions Answered
+# 💼 Business Questions Answered
 
 The SQL analysis can answer questions such as:
 Which customer generates the highest revenue?
@@ -339,7 +339,7 @@ Which plan has no customers?
 Who are the highest-revenue customers within each plan?
 Which customers need renewal soon?
 
-#📈 Key SQL Concepts Demonstrated
+# 📈 Key SQL Concepts Demonstrated
 
 Basic SQL
 
@@ -374,7 +374,7 @@ RANK()
 PARTITION BY
 Window Functions
 
-#🚀 How to Run the Project
+# 🚀 How to Run the Project
 
 Step 1 — Install MySQL
 
@@ -449,7 +449,7 @@ Simple   → 1–35
 Medium   → 36–70
 Hard     → 71–100
 
-#📁 Suggested GitHub Structure
+# 📁 Suggested GitHub Structure
 
 broadband-database-sql/
 │
@@ -469,7 +469,7 @@ broadband-database-sql/
 ├── README.md
 └── broadband_db.sql
 
-#🎓 Learning Outcomes
+# 🎓 Learning Outcomes
 
 After completing this project, the major skills practiced are:
 
@@ -490,7 +490,7 @@ Usage analysis
 Payment analysis
 Business-oriented SQL problem solving
 
-#🔮 Possible Future Improvements
+# 🔮 Possible Future Improvements
 
 The database could be extended with:
 
@@ -501,7 +501,7 @@ Plan upgrade history — track customers changing plans.
 Monthly billing table — maintain generated invoices.
 Location/area table — analyze customers geographically.
 
-#👨‍💻 Project Summary
+# 👨‍💻 Project Summary
 
 Broadband Database SQL Project is a relational MySQL project that models a broadband service provider and provides a practical environment for SQL analysis.
 
@@ -509,7 +509,7 @@ It combines customer management, broadband plans, usage tracking, payment transa
 
 The project progresses from basic SQL queries to advanced analytical queries, making it suitable for practicing SQL for Data Analyst, Python Full-Stack, and database-focused interviews.
 
-#⭐ Skills Demonstrated
+# ⭐ Skills Demonstrated
 
 MySQL
 SQL
