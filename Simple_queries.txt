@@ -1,0 +1,544 @@
+USE broadband_db;
+
+-- =========================================================
+-- SIMPLE QUERIES
+-- Q1 - Q100
+-- =========================================================
+
+
+-- =========================================================
+-- 1. SQL FUNDAMENTALS
+-- =========================================================
+
+-- Q1. Display all plans.
+SELECT * FROM plans;
+
+-- Q2. Display all customers.
+SELECT * FROM customers;
+
+-- Q3. Display all users.
+SELECT * FROM users;
+
+-- Q4. Display all transactions.
+SELECT * FROM transactions;
+
+-- Q5. Display all usage logs.
+SELECT * FROM usage_logs;
+
+-- Q6. Display all renewal alert logs.
+SELECT * FROM renewal_alert_logs;
+
+-- Q7. Display customer names only.
+SELECT name FROM customers;
+
+-- Q8. Display plan names only.
+SELECT name FROM plans;
+
+-- Q9. Display usernames and roles.
+SELECT username, role FROM users;
+
+-- Q10. Display transaction amount and payment mode.
+SELECT amount, payment_mode FROM transactions;
+
+
+-- =========================================================
+-- 2. SELECT WITH ALIAS
+-- =========================================================
+
+-- Q11. Display customer name with alias Customer_Name.
+SELECT name AS Customer_Name
+FROM customers;
+
+-- Q12. Display plan name with alias Plan_Name.
+SELECT name AS Plan_Name
+FROM plans;
+
+-- Q13. Display plan price with alias Plan_Price.
+SELECT price AS Plan_Price
+FROM plans;
+
+-- Q14. Display customer connection ID with alias Connection_ID.
+SELECT connection_id AS Connection_ID
+FROM customers;
+
+-- Q15. Display transaction amount with alias Transaction_Amount.
+SELECT amount AS Transaction_Amount
+FROM transactions;
+
+
+-- =========================================================
+-- 3. DISTINCT
+-- =========================================================
+
+-- Q16. Display unique customer addresses.
+SELECT DISTINCT address
+FROM customers;
+
+-- Q17. Display unique payment modes.
+SELECT DISTINCT payment_mode
+FROM transactions;
+
+-- Q18. Display unique transaction statuses.
+SELECT DISTINCT status
+FROM transactions;
+
+-- Q19. Display unique user roles.
+SELECT DISTINCT role
+FROM users;
+
+-- Q20. Display unique plan validity days.
+SELECT DISTINCT validity_days
+FROM plans;
+
+
+-- =========================================================
+-- 4. WHERE CLAUSE
+-- =========================================================
+
+-- Q21. Display customers whose plan_id is 1.
+SELECT *
+FROM customers
+WHERE plan_id = 1;
+
+-- Q22. Display plans costing more than 1000.
+SELECT *
+FROM plans
+WHERE price > 1000;
+
+-- Q23. Display plans costing less than 1000.
+SELECT *
+FROM plans
+WHERE price < 1000;
+
+-- Q24. Display plans costing exactly 1000.
+SELECT *
+FROM plans
+WHERE price = 1000;
+
+-- Q25. Display transactions greater than 500.
+SELECT *
+FROM transactions
+WHERE amount > 500;
+
+-- Q26. Display transactions less than 500.
+SELECT *
+FROM transactions
+WHERE amount < 500;
+
+-- Q27. Display successful transactions.
+SELECT *
+FROM transactions
+WHERE status = 'Success';
+
+-- Q28. Display failed transactions.
+SELECT *
+FROM transactions
+WHERE status = 'Failed';
+
+-- Q29. Display admin users.
+SELECT *
+FROM users
+WHERE role = 'admin';
+
+-- Q30. Display customer users.
+SELECT *
+FROM users
+WHERE role = 'customer';
+
+
+-- =========================================================
+-- 5. COMPARISON OPERATORS
+-- =========================================================
+
+-- Q31. Display plans with speed greater than 100 Mbps.
+SELECT *
+FROM plans
+WHERE speed > 100;
+
+-- Q32. Display plans with speed less than 100 Mbps.
+SELECT *
+FROM plans
+WHERE speed < 100;
+
+-- Q33. Display plans with validity of 30 days.
+SELECT *
+FROM plans
+WHERE validity_days = 30;
+
+-- Q34. Display customers whose plan_id is not 1.
+SELECT *
+FROM customers
+WHERE plan_id <> 1;
+
+-- Q35. Display transactions with amount greater than or equal to 500.
+SELECT *
+FROM transactions
+WHERE amount >= 500;
+
+-- Q36. Display transactions with amount less than or equal to 500.
+SELECT *
+FROM transactions
+WHERE amount <= 500;
+
+
+-- =========================================================
+-- 6. AND / OR / NOT
+-- =========================================================
+
+-- Q37. Display plans costing more than 500 and having speed greater than 50.
+SELECT *
+FROM plans
+WHERE price > 500
+  AND speed > 50;
+
+-- Q38. Display plans costing less than 1000 or having speed greater than 200.
+SELECT *
+FROM plans
+WHERE price < 1000
+   OR speed > 200;
+
+-- Q39. Display successful transactions greater than 500.
+SELECT *
+FROM transactions
+WHERE status = 'Success'
+  AND amount > 500;
+
+-- Q40. Display transactions that are not successful.
+SELECT *
+FROM transactions
+WHERE NOT status = 'Success';
+
+-- Q41. Display customers with plan_id 1 or 2.
+SELECT *
+FROM customers
+WHERE plan_id = 1
+   OR plan_id = 2;
+
+-- Q42. Display users who are either admin or staff.
+SELECT *
+FROM users
+WHERE role = 'admin'
+   OR role = 'staff';
+
+-- Q43. Display plans with speed greater than 50 and price less than 2000.
+SELECT *
+FROM plans
+WHERE speed > 50
+  AND price < 2000;
+
+-- Q44. Display successful transactions with amount between 500 and 2000.
+SELECT *
+FROM transactions
+WHERE status = 'Success'
+  AND amount >= 500
+  AND amount <= 2000;
+
+
+-- =========================================================
+-- 7. BETWEEN
+-- =========================================================
+
+-- Q45. Display plans with price between 500 and 1500.
+SELECT *
+FROM plans
+WHERE price BETWEEN 500 AND 1500;
+
+-- Q46. Display plans with speed between 50 and 200 Mbps.
+SELECT *
+FROM plans
+WHERE speed BETWEEN 50 AND 200;
+
+-- Q47. Display transactions with amount between 500 and 1000.
+SELECT *
+FROM transactions
+WHERE amount BETWEEN 500 AND 1000;
+
+-- Q48. Display plans with validity between 30 and 90 days.
+SELECT *
+FROM plans
+WHERE validity_days BETWEEN 30 AND 90;
+
+-- Q49. Display usage records with total_usage_gb between 10 and 50.
+SELECT *
+FROM usage_logs
+WHERE total_usage_gb BETWEEN 10 AND 50;
+
+
+-- =========================================================
+-- 8. IN / NOT IN
+-- =========================================================
+
+-- Q50. Display customers having plan_id 1, 2, or 3.
+SELECT *
+FROM customers
+WHERE plan_id IN (1, 2, 3);
+
+-- Q51. Display users whose role is admin or staff.
+SELECT *
+FROM users
+WHERE role IN ('admin', 'staff');
+
+-- Q52. Display transactions with payment modes UPI or Card.
+SELECT *
+FROM transactions
+WHERE payment_mode IN ('UPI', 'Card');
+
+-- Q53. Display transactions that are not successful or failed.
+SELECT *
+FROM transactions
+WHERE status NOT IN ('Success', 'Failed');
+
+-- Q54. Display plans with validity of either 30, 60, or 90 days.
+SELECT *
+FROM plans
+WHERE validity_days IN (30, 60, 90);
+
+
+-- =========================================================
+-- 9. LIKE
+-- =========================================================
+
+-- Q55. Display customers whose names start with 'A'.
+SELECT *
+FROM customers
+WHERE name LIKE 'A%';
+
+-- Q56. Display customers whose names end with 'a'.
+SELECT *
+FROM customers
+WHERE name LIKE '%a';
+
+-- Q57. Display customers whose names contain 'an'.
+SELECT *
+FROM customers
+WHERE name LIKE '%an%';
+
+-- Q58. Display plans whose names start with 'Home'.
+SELECT *
+FROM plans
+WHERE name LIKE 'Home%';
+
+-- Q59. Display usernames starting with 'a'.
+SELECT *
+FROM users
+WHERE username LIKE 'a%';
+
+-- Q60. Display customers whose email contains 'gmail'.
+SELECT *
+FROM customers
+WHERE email LIKE '%gmail%';
+
+
+-- =========================================================
+-- 10. ORDER BY
+-- =========================================================
+
+-- Q61. Display plans ordered by price ascending.
+SELECT *
+FROM plans
+ORDER BY price ASC;
+
+-- Q62. Display plans ordered by price descending.
+SELECT *
+FROM plans
+ORDER BY price DESC;
+
+-- Q63. Display customers ordered alphabetically by name.
+SELECT *
+FROM customers
+ORDER BY name ASC;
+
+-- Q64. Display customers in reverse alphabetical order.
+SELECT *
+FROM customers
+ORDER BY name DESC;
+
+-- Q65. Display transactions ordered by amount ascending.
+SELECT *
+FROM transactions
+ORDER BY amount ASC;
+
+-- Q66. Display transactions ordered by amount descending.
+SELECT *
+FROM transactions
+ORDER BY amount DESC;
+
+-- Q67. Display plans ordered by speed descending.
+SELECT *
+FROM plans
+ORDER BY speed DESC;
+
+-- Q68. Display users ordered by username.
+SELECT *
+FROM users
+ORDER BY username ASC;
+
+
+-- =========================================================
+-- 11. LIMIT
+-- =========================================================
+
+-- Q69. Display the first 5 customers.
+SELECT *
+FROM customers
+LIMIT 5;
+
+-- Q70. Display the first 3 plans.
+SELECT *
+FROM plans
+LIMIT 3;
+
+-- Q71. Display the 5 highest-priced plans.
+SELECT *
+FROM plans
+ORDER BY price DESC
+LIMIT 5;
+
+-- Q72. Display the 5 lowest-priced plans.
+SELECT *
+FROM plans
+ORDER BY price ASC
+LIMIT 5;
+
+-- Q73. Display the 5 highest transactions.
+SELECT *
+FROM transactions
+ORDER BY amount DESC
+LIMIT 5;
+
+-- Q74. Display the 5 lowest transactions.
+SELECT *
+FROM transactions
+ORDER BY amount ASC
+LIMIT 5;
+
+
+-- =========================================================
+-- 12. NULL / IS NULL
+-- =========================================================
+
+-- Q75. Display users whose customer_id is NULL.
+SELECT *
+FROM users
+WHERE customer_id IS NULL;
+
+-- Q76. Display users whose customer_id is not NULL.
+SELECT *
+FROM users
+WHERE customer_id IS NOT NULL;
+
+-- Q77. Display customers whose followed_up value is NULL.
+SELECT *
+FROM customers
+WHERE followed_up IS NULL;
+
+-- Q78. Display customers whose followed_up value is not NULL.
+SELECT *
+FROM customers
+WHERE followed_up IS NOT NULL;
+
+
+-- =========================================================
+-- 13. BASIC STRING FUNCTIONS
+-- =========================================================
+
+-- Q79. Display customer names in uppercase.
+SELECT UPPER(name) AS Customer_Name
+FROM customers;
+
+-- Q80. Display customer names in lowercase.
+SELECT LOWER(name) AS Customer_Name
+FROM customers;
+
+-- Q81. Display the length of each customer name.
+SELECT name, LENGTH(name) AS Name_Length
+FROM customers;
+
+-- Q82. Display plan names in uppercase.
+SELECT UPPER(name) AS Plan_Name
+FROM plans;
+
+-- Q83. Display usernames in lowercase.
+SELECT LOWER(username) AS Username
+FROM users;
+
+-- Q84. Display customer names with their first 3 characters.
+SELECT name, LEFT(name, 3) AS First_Three_Characters
+FROM customers;
+
+
+-- =========================================================
+-- 14. BASIC NUMERICAL FUNCTIONS
+-- =========================================================
+
+-- Q85. Display plan prices rounded to the nearest integer.
+SELECT name, ROUND(price) AS Rounded_Price
+FROM plans;
+
+-- Q86. Display the highest plan price.
+SELECT MAX(price) AS Highest_Price
+FROM plans;
+
+-- Q87. Display the lowest plan price.
+SELECT MIN(price) AS Lowest_Price
+FROM plans;
+
+-- Q88. Display the average plan price.
+SELECT AVG(price) AS Average_Price
+FROM plans;
+
+-- Q89. Display the total of all plan prices.
+SELECT SUM(price) AS Total_Plan_Price
+FROM plans;
+
+
+-- =========================================================
+-- 15. BASIC AGGREGATE FUNCTIONS
+-- =========================================================
+
+-- Q90. Count the total number of customers.
+SELECT COUNT(*) AS Total_Customers
+FROM customers;
+
+-- Q91. Count the total number of plans.
+SELECT COUNT(*) AS Total_Plans
+FROM plans;
+
+-- Q92. Count the total number of users.
+SELECT COUNT(*) AS Total_Users
+FROM users;
+
+-- Q93. Count the total number of transactions.
+SELECT COUNT(*) AS Total_Transactions
+FROM transactions;
+
+-- Q94. Find the total transaction amount.
+SELECT SUM(amount) AS Total_Transaction_Amount
+FROM transactions;
+
+-- Q95. Find the average transaction amount.
+SELECT AVG(amount) AS Average_Transaction_Amount
+FROM transactions;
+
+-- Q96. Find the highest transaction amount.
+SELECT MAX(amount) AS Highest_Transaction
+FROM transactions;
+
+-- Q97. Find the lowest transaction amount.
+SELECT MIN(amount) AS Lowest_Transaction
+FROM transactions;
+
+
+-- =========================================================
+-- 16. BASIC DATE FUNCTIONS
+-- =========================================================
+
+-- Q98. Display the current date.
+SELECT CURDATE() AS current_date_value;
+
+-- Q99. Display the current date and time.
+SELECT NOW() AS Current_Date_Time;
+
+-- Q100. Display transaction IDs with their transaction year.
+SELECT id, YEAR(date) AS Transaction_Year
+FROM transactions;

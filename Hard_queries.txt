@@ -1,0 +1,995 @@
+USE broadband_db;
+
+-- ============================================================
+-- HARD SQL QUERIES
+-- Q201 - Q300
+-- ============================================================
+
+
+-- ============================================================
+-- A. COMPLEX JOINS + SUBQUERIES
+-- Q201 - Q225
+-- ============================================================
+
+-- Q201. Find customers whose plan price is greater than the average plan price.
+SELECT c.id, c.name, p.name AS plan_name, p.price
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+WHERE p.price > (
+    SELECT AVG(price)
+    FROM plans
+);
+
+
+-- Q202. Find customers using the most expensive plan.
+SELECT c.id, c.name, p.name AS plan_name, p.price
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+WHERE p.price = (
+    SELECT MAX(price)
+    FROM plans
+);
+
+
+-- Q203. Find customers using the cheapest plan.
+SELECT c.id, c.name, p.name AS plan_name, p.price
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+WHERE p.price = (
+    SELECT MIN(price)
+    FROM plans
+);
+
+
+-- Q204. Find customers whose total successful payment is greater
+-- than the average successful payment of all customers.
+SELECT c.id, c.name, SUM(t.amount) AS total_paid
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name
+HAVING SUM(t.amount) > (
+    SELECT AVG(customer_total)
+    FROM (
+        SELECT SUM(amount) AS customer_total
+        FROM transactions
+        WHERE status = 'Success'
+        GROUP BY customer_id
+    ) x
+);
+
+
+-- Q205. Find customers who have made at least one successful transaction
+-- and are using a plan costing more than 1000.
+SELECT DISTINCT c.id, c.name, p.name AS plan_name
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+AND p.price > 1000;
+
+
+-- Q206. Find customers who have paid more than their current plan price.
+SELECT c.id, c.name,
+       p.price AS plan_price,
+       SUM(t.amount) AS total_paid
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name, p.price
+HAVING SUM(t.amount) > p.price;
+
+
+-- Q207. Find plans that have at least two customers.
+SELECT p.id, p.name, COUNT(c.id) AS customer_count
+FROM plans p
+JOIN customers c ON p.id = c.plan_id
+GROUP BY p.id, p.name
+HAVING COUNT(c.id) >= 2;
+
+
+-- Q208. Find customers whose total usage is greater than the
+-- average total usage of all customers.
+SELECT c.id, c.name,
+       SUM(u.total_usage_gb) AS total_usage
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY c.id, c.name
+HAVING SUM(u.total_usage_gb) > (
+    SELECT AVG(total_usage)
+    FROM (
+        SELECT SUM(total_usage_gb) AS total_usage
+        FROM usage_logs
+        GROUP BY customer_id
+    ) x
+);
+
+
+-- Q209. Find the customer with the highest total successful payment.
+SELECT c.id, c.name, SUM(t.amount) AS total_paid
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name
+ORDER BY total_paid DESC
+LIMIT 1;
+
+
+-- Q210. Find the customer with the highest total data usage.
+SELECT c.id, c.name, SUM(u.total_usage_gb) AS total_usage
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY c.id, c.name
+ORDER BY total_usage DESC
+LIMIT 1;
+
+
+-- Q211. Find customers whose usage exceeds their plan data limit.
+SELECT c.id, c.name,
+       p.name AS plan_name,
+       p.data_limit_gb,
+       SUM(u.total_usage_gb) AS total_usage
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN usage_logs u ON c.id = u.customer_id
+WHERE p.data_limit_gb IS NOT NULL
+GROUP BY c.id, c.name, p.name, p.data_limit_gb
+HAVING SUM(u.total_usage_gb) > p.data_limit_gb;
+
+
+-- Q212. Find customers whose total usage is between 50% and 100%
+-- of their plan data limit.
+SELECT c.id, c.name,
+       p.name AS plan_name,
+       p.data_limit_gb,
+       SUM(u.total_usage_gb) AS total_usage
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN usage_logs u ON c.id = u.customer_id
+WHERE p.data_limit_gb IS NOT NULL
+GROUP BY c.id, c.name, p.name, p.data_limit_gb
+HAVING SUM(u.total_usage_gb)
+       BETWEEN p.data_limit_gb * 0.5
+       AND p.data_limit_gb;
+
+
+-- Q213. Find customers with both successful and failed transactions.
+SELECT c.id, c.name
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+GROUP BY c.id, c.name
+HAVING SUM(t.status = 'Success') > 0
+AND SUM(t.status = 'Failed') > 0;
+
+
+-- Q214. Find customers who have more than one transaction.
+SELECT c.id, c.name, COUNT(t.id) AS transaction_count
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+GROUP BY c.id, c.name
+HAVING COUNT(t.id) > 1;
+
+
+-- Q215. Find customers who have more than one usage record.
+SELECT c.id, c.name, COUNT(u.id) AS usage_records
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY c.id, c.name
+HAVING COUNT(u.id) > 1;
+
+
+-- Q216. Find plans whose price is greater than the average price.
+SELECT id, name, price
+FROM plans
+WHERE price > (
+    SELECT AVG(price)
+    FROM plans
+);
+
+
+-- Q217. Find customers whose plan price is equal to the maximum plan price.
+SELECT c.id, c.name, p.name AS plan_name
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+WHERE p.price = (
+    SELECT MAX(price)
+    FROM plans
+);
+
+
+-- Q218. Find customers whose successful payment is greater than
+-- the price of their plan.
+SELECT c.id, c.name,
+       p.name AS plan_name,
+       p.price,
+       SUM(t.amount) AS total_paid
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name, p.name, p.price
+HAVING SUM(t.amount) > p.price;
+
+
+-- Q219. Find customers whose total payment equals their plan price.
+SELECT c.id, c.name,
+       p.name AS plan_name,
+       p.price,
+       SUM(t.amount) AS total_paid
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name, p.name, p.price
+HAVING SUM(t.amount) = p.price;
+
+
+-- Q220. Find customers who have no successful transactions.
+SELECT c.id, c.name
+FROM customers c
+LEFT JOIN transactions t
+    ON c.id = t.customer_id
+    AND t.status = 'Success'
+WHERE t.id IS NULL;
+
+
+-- Q221. Find customers who have no usage records.
+SELECT c.id, c.name
+FROM customers c
+LEFT JOIN usage_logs u
+    ON c.id = u.customer_id
+WHERE u.id IS NULL;
+
+
+-- Q222. Find plans that currently have no customers.
+SELECT p.id, p.name
+FROM plans p
+LEFT JOIN customers c
+    ON p.id = c.plan_id
+WHERE c.id IS NULL;
+
+
+-- Q223. Find customers who have both usage records and transactions.
+SELECT DISTINCT c.id, c.name
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+JOIN transactions t ON c.id = t.customer_id;
+
+
+-- Q224. Find customers who have successful payments
+-- but no usage records.
+SELECT DISTINCT c.id, c.name
+FROM customers c
+JOIN transactions t
+    ON c.id = t.customer_id
+LEFT JOIN usage_logs u
+    ON c.id = u.customer_id
+WHERE t.status = 'Success'
+AND u.id IS NULL;
+
+
+-- Q225. Find customers who have usage but no transactions.
+SELECT DISTINCT c.id, c.name
+FROM customers c
+JOIN usage_logs u
+    ON c.id = u.customer_id
+LEFT JOIN transactions t
+    ON c.id = t.customer_id
+WHERE t.id IS NULL;
+
+
+
+-- ============================================================
+-- B. AGGREGATION + HAVING + CASE
+-- Q226 - Q245
+-- ============================================================
+
+-- Q226. Count customers in each plan and show only plans
+-- having more than one customer.
+SELECT p.name,
+       COUNT(c.id) AS customer_count
+FROM plans p
+LEFT JOIN customers c ON p.id = c.plan_id
+GROUP BY p.id, p.name
+HAVING COUNT(c.id) > 1;
+
+
+-- Q227. Calculate total successful revenue for each plan.
+SELECT p.name,
+       SUM(t.amount) AS total_revenue
+FROM plans p
+JOIN customers c ON p.id = c.plan_id
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY p.id, p.name;
+
+
+-- Q228. Find plans generating more than 2000 successful revenue.
+SELECT p.name,
+       SUM(t.amount) AS total_revenue
+FROM plans p
+JOIN customers c ON p.id = c.plan_id
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY p.id, p.name
+HAVING SUM(t.amount) > 2000;
+
+
+-- Q229. Calculate average transaction amount for each payment mode.
+SELECT payment_mode,
+       AVG(amount) AS average_amount
+FROM transactions
+GROUP BY payment_mode;
+
+
+-- Q230. Find customers who used more than 80% of their plan data limit.
+SELECT c.id, c.name,
+       p.name AS plan_name,
+       p.data_limit_gb,
+       SUM(u.total_usage_gb) AS total_usage,
+       ROUND(
+           SUM(u.total_usage_gb) / p.data_limit_gb * 100,
+           2
+       ) AS usage_percentage
+FROM customers c
+JOIN plans p ON c.plan_id = p.id
+JOIN usage_logs u ON c.id = u.customer_id
+WHERE p.data_limit_gb IS NOT NULL
+GROUP BY c.id, c.name, p.name, p.data_limit_gb
+HAVING usage_percentage > 80;
+
+
+-- Q231. Categorize customers according to total usage.
+SELECT c.id,
+       c.name,
+       SUM(u.total_usage_gb) AS total_usage,
+       CASE
+           WHEN SUM(u.total_usage_gb) < 20 THEN 'Low Usage'
+           WHEN SUM(u.total_usage_gb) BETWEEN 20 AND 50 THEN 'Medium Usage'
+           ELSE 'High Usage'
+       END AS usage_category
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY c.id, c.name;
+
+
+-- Q232. Categorize customers based on total successful payment.
+SELECT c.id,
+       c.name,
+       SUM(t.amount) AS total_paid,
+       CASE
+           WHEN SUM(t.amount) < 1000 THEN 'Low'
+           WHEN SUM(t.amount) BETWEEN 1000 AND 3000 THEN 'Medium'
+           ELSE 'High'
+       END AS payment_category
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name;
+
+
+-- Q233. Count successful, failed and pending transactions.
+SELECT
+    SUM(status = 'Success') AS successful_transactions,
+    SUM(status = 'Failed') AS failed_transactions,
+    SUM(status = 'Pending') AS pending_transactions
+FROM transactions;
+
+
+-- Q234. Find the maximum transaction amount for each payment mode.
+SELECT payment_mode,
+       MAX(amount) AS maximum_amount
+FROM transactions
+GROUP BY payment_mode;
+
+
+-- Q235. Find the minimum transaction amount for each payment mode.
+SELECT payment_mode,
+       MIN(amount) AS minimum_amount
+FROM transactions
+GROUP BY payment_mode;
+
+
+-- Q236. Find payment modes whose average amount is greater than 1000.
+SELECT payment_mode,
+       AVG(amount) AS average_amount
+FROM transactions
+GROUP BY payment_mode
+HAVING AVG(amount) > 1000;
+
+
+-- Q237. Find the total usage for each customer and sort from highest
+-- to lowest.
+SELECT c.id,
+       c.name,
+       SUM(u.total_usage_gb) AS total_usage
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY c.id, c.name
+ORDER BY total_usage DESC;
+
+
+-- Q238. Find plans with average customer usage greater than 50 GB.
+SELECT p.id,
+       p.name,
+       AVG(u.total_usage_gb) AS average_usage
+FROM plans p
+JOIN customers c ON p.id = c.plan_id
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY p.id, p.name
+HAVING AVG(u.total_usage_gb) > 50;
+
+
+-- Q239. Find the number of transactions made by each customer.
+SELECT c.id,
+       c.name,
+       COUNT(t.id) AS transaction_count
+FROM customers c
+LEFT JOIN transactions t ON c.id = t.customer_id
+GROUP BY c.id, c.name;
+
+
+-- Q240. Find the total transaction amount for each customer.
+SELECT c.id,
+       c.name,
+       COALESCE(SUM(t.amount), 0) AS total_amount
+FROM customers c
+LEFT JOIN transactions t ON c.id = t.customer_id
+GROUP BY c.id, c.name;
+
+
+-- Q241. Find customers whose average transaction amount is above
+-- the overall transaction average.
+SELECT c.id,
+       c.name,
+       AVG(t.amount) AS customer_average
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+GROUP BY c.id, c.name
+HAVING AVG(t.amount) > (
+    SELECT AVG(amount)
+    FROM transactions
+);
+
+
+-- Q242. Find plans with more than 100 GB data limit.
+SELECT id, name, data_limit_gb
+FROM plans
+WHERE data_limit_gb > 100;
+
+
+-- Q243. Count customers by plan speed.
+SELECT p.speed,
+       COUNT(c.id) AS customer_count
+FROM plans p
+LEFT JOIN customers c ON p.id = c.plan_id
+GROUP BY p.speed;
+
+
+-- Q244. Find the total revenue generated by each customer.
+SELECT c.id,
+       c.name,
+       COALESCE(SUM(t.amount), 0) AS revenue
+FROM customers c
+LEFT JOIN transactions t
+    ON c.id = t.customer_id
+    AND t.status = 'Success'
+GROUP BY c.id, c.name
+ORDER BY revenue DESC;
+
+
+-- Q245. Find customers whose successful payment count is at least 2.
+SELECT c.id,
+       c.name,
+       COUNT(t.id) AS successful_payments
+FROM customers c
+JOIN transactions t ON c.id = t.customer_id
+WHERE t.status = 'Success'
+GROUP BY c.id, c.name
+HAVING COUNT(t.id) >= 2;
+
+
+
+-- ============================================================
+-- C. STRING + DATE + NUMERICAL FUNCTIONS
+-- Q246 - Q260
+-- ============================================================
+
+-- Q246. Display customer names in uppercase with their plan names.
+SELECT UPPER(c.name) AS customer_name,
+       UPPER(p.name) AS plan_name
+FROM customers c
+JOIN plans p ON c.plan_id = p.id;
+
+
+-- Q247. Display customer names in lowercase.
+SELECT LOWER(name) AS customer_name
+FROM customers;
+
+
+-- Q248. Display each customer name and its character length.
+SELECT name,
+       LENGTH(name) AS name_length
+FROM customers;
+
+
+-- Q249. Display customer name and first five characters.
+SELECT name,
+       LEFT(name, 5) AS first_five_characters
+FROM customers;
+
+
+-- Q250. Display customer names after removing leading/trailing spaces.
+SELECT TRIM(name) AS cleaned_name
+FROM customers;
+
+
+-- Q251. Concatenate customer name and connection ID.
+SELECT CONCAT(name, ' - ', connection_id) AS customer_connection
+FROM customers;
+
+
+-- Q252. Display customer email domain.
+SELECT email,
+       SUBSTRING_INDEX(email, '@', -1) AS email_domain
+FROM customers;
+
+
+-- Q253. Display customer names whose email contains 'gmail'.
+SELECT name, email
+FROM customers
+WHERE LOWER(email) LIKE '%gmail%';
+
+
+-- Q254. Display plan names and their prices rounded to nearest integer.
+SELECT name,
+       ROUND(price) AS rounded_price
+FROM plans;
+
+
+-- Q255. Display plan prices with 10% GST added.
+SELECT name,
+       price,
+       ROUND(price * 1.10, 2) AS price_with_gst
+FROM plans;
+
+
+-- Q256. Display the number of days remaining between today and due date.
+SELECT id,
+       name,
+       due_date,
+       DATEDIFF(due_date, CURDATE()) AS days_remaining
+FROM customers;
+
+
+-- Q257. Find customers whose due date has passed.
+SELECT id, name, due_date
+FROM customers
+WHERE due_date < CURDATE();
+
+
+-- Q258. Find customers whose due date is within the next 7 days.
+SELECT id, name, due_date
+FROM customers
+WHERE due_date BETWEEN CURDATE()
+                   AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+
+
+-- Q259. Display customer start year and month.
+SELECT name,
+       YEAR(start_date) AS start_year,
+       MONTH(start_date) AS start_month
+FROM customers;
+
+
+-- Q260. Find transactions made in the current year.
+SELECT *
+FROM transactions
+WHERE YEAR(date) = YEAR(CURDATE());
+
+
+
+-- ============================================================
+-- D. INDEXES
+-- Q261 - Q270
+-- ============================================================
+
+-- Q261. Create an index on customer email.
+CREATE INDEX idx_customer_email
+ON customers(email);
+
+
+-- Q262. Create an index on customer plan_id.
+CREATE INDEX idx_customer_plan
+ON customers(plan_id);
+
+
+-- Q263. Create an index on transaction customer_id.
+CREATE INDEX idx_transaction_customer
+ON transactions(customer_id);
+
+
+-- Q264. Create an index on usage_logs customer_id.
+CREATE INDEX idx_usage_customer
+ON usage_logs(customer_id);
+
+
+-- Q265. Create an index on transaction status.
+CREATE INDEX idx_transaction_status
+ON transactions(status);
+
+
+-- Q266. Show indexes on customers.
+SHOW INDEX FROM customers;
+
+
+-- Q267. Show indexes on transactions.
+SHOW INDEX FROM transactions;
+
+
+-- Q268. Show indexes on usage_logs.
+SHOW INDEX FROM usage_logs;
+
+
+-- Q269. Use EXPLAIN to inspect customer email search.
+EXPLAIN
+SELECT *
+FROM customers
+WHERE email = 'customer@gmail.com';
+
+
+-- Q270. Use EXPLAIN to inspect successful transactions.
+EXPLAIN
+SELECT *
+FROM transactions
+WHERE status = 'Success';
+
+
+
+-- ============================================================
+-- E. VIEWS
+-- Q271 - Q280
+-- ============================================================
+
+-- Q271. Create a view showing customer and plan details.
+CREATE VIEW customer_plan_view AS
+SELECT c.id,
+       c.name AS customer_name,
+       c.connection_id,
+       c.email,
+       p.name AS plan_name,
+       p.speed,
+       p.price
+FROM customers c
+JOIN plans p ON c.plan_id = p.id;
+
+
+-- Q272. Display customer_plan_view.
+SELECT *
+FROM customer_plan_view;
+
+
+-- Q273. Create a view showing successful transactions.
+CREATE VIEW successful_transactions_view AS
+SELECT t.id,
+       c.name AS customer_name,
+       t.amount,
+       t.payment_mode,
+       t.date
+FROM transactions t
+JOIN customers c ON t.customer_id = c.id
+WHERE t.status = 'Success';
+
+
+-- Q274. Display successful transaction view.
+SELECT *
+FROM successful_transactions_view;
+
+
+-- Q275. Create a view showing total successful payment by customer.
+CREATE VIEW customer_payment_summary AS
+SELECT c.id,
+       c.name AS customer_name,
+       COALESCE(SUM(t.amount), 0) AS total_paid
+FROM customers c
+LEFT JOIN transactions t
+    ON c.id = t.customer_id
+    AND t.status = 'Success'
+GROUP BY c.id, c.name;
+
+
+-- Q276. Display customer payment summary.
+SELECT *
+FROM customer_payment_summary;
+
+
+-- Q277. Create a view showing customer usage summary.
+CREATE VIEW customer_usage_summary AS
+SELECT c.id,
+       c.name AS customer_name,
+       SUM(u.total_usage_gb) AS total_usage
+FROM customers c
+JOIN usage_logs u ON c.id = u.customer_id
+GROUP BY c.id, c.name;
+
+
+-- Q278. Display customer usage summary.
+SELECT *
+FROM customer_usage_summary;
+
+
+-- Q279. Find customers from the customer-plan view
+-- using plans costing more than 1000.
+SELECT *
+FROM customer_plan_view
+WHERE price > 1000;
+
+
+-- Q280. Find customers from the payment summary
+-- who paid more than 2000.
+SELECT *
+FROM customer_payment_summary
+WHERE total_paid > 2000;
+
+
+
+-- ============================================================
+-- F. STORED PROCEDURES
+-- Q281 - Q290
+-- ============================================================
+
+DELIMITER $$
+
+
+-- Q281. Create a procedure to find customer by ID.
+CREATE PROCEDURE GetCustomerById(IN customer_id INT)
+BEGIN
+    SELECT *
+    FROM customers
+    WHERE id = customer_id;
+END $$
+
+
+-- Q282. Execute customer procedure.
+CALL GetCustomerById(1) $$
+
+
+-- Q283. Create procedure to find customers by plan.
+CREATE PROCEDURE GetCustomersByPlan(IN plan_id_input INT)
+BEGIN
+    SELECT c.id,
+           c.name,
+           c.email,
+           p.name AS plan_name
+    FROM customers c
+    JOIN plans p ON c.plan_id = p.id
+    WHERE c.plan_id = plan_id_input;
+END $$
+
+
+-- Q284. Execute plan customer procedure.
+CALL GetCustomersByPlan(1) $$
+
+
+-- Q285. Create procedure to calculate total successful payment
+-- for a customer.
+CREATE PROCEDURE GetCustomerPayment(IN customer_id_input INT)
+BEGIN
+    SELECT c.id,
+           c.name,
+           COALESCE(SUM(t.amount), 0) AS total_paid
+    FROM customers c
+    LEFT JOIN transactions t
+        ON c.id = t.customer_id
+        AND t.status = 'Success'
+    WHERE c.id = customer_id_input
+    GROUP BY c.id, c.name;
+END $$
+
+
+-- Q286. Execute customer payment procedure.
+CALL GetCustomerPayment(1) $$
+
+
+-- Q287. Create procedure to find customers with usage above
+-- a given value.
+CREATE PROCEDURE GetHighUsageCustomers(IN usage_limit DECIMAL(10,2))
+BEGIN
+    SELECT c.id,
+           c.name,
+           SUM(u.total_usage_gb) AS total_usage
+    FROM customers c
+    JOIN usage_logs u ON c.id = u.customer_id
+    GROUP BY c.id, c.name
+    HAVING SUM(u.total_usage_gb) > usage_limit;
+END $$
+
+
+-- Q288. Execute high usage procedure.
+CALL GetHighUsageCustomers(50) $$
+
+
+-- Q289. Create procedure to count customers for a plan.
+CREATE PROCEDURE CountCustomersByPlan(IN plan_id_input INT)
+BEGIN
+    SELECT p.id,
+           p.name,
+           COUNT(c.id) AS customer_count
+    FROM plans p
+    LEFT JOIN customers c ON p.id = c.plan_id
+    WHERE p.id = plan_id_input
+    GROUP BY p.id, p.name;
+END $$
+
+
+-- Q290. Execute count customer procedure.
+CALL CountCustomersByPlan(1) $$
+
+DELIMITER ;
+
+
+
+-- ============================================================
+-- G. FUNCTIONS
+-- Q291 - Q295
+-- ============================================================
+
+DELIMITER $$
+
+
+-- Q291. Create a function to calculate GST-inclusive price.
+CREATE FUNCTION CalculateGST(price_value DECIMAL(10,2))
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN ROUND(price_value * 1.10, 2);
+END $$
+
+
+-- Q292. Use the GST function.
+SELECT name,
+       price,
+       CalculateGST(price) AS price_with_gst
+FROM plans $$
+
+
+-- Q293. Create a function to calculate discount.
+CREATE FUNCTION CalculateDiscount(
+    price_value DECIMAL(10,2),
+    discount_percent DECIMAL(5,2)
+)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN ROUND(
+        price_value - (price_value * discount_percent / 100),
+        2
+    );
+END $$
+
+
+-- Q294. Apply 10% discount to all plans.
+SELECT name,
+       price,
+       CalculateDiscount(price, 10) AS discounted_price
+FROM plans $$
+
+
+-- Q295. Calculate number of days between start date and due date.
+CREATE FUNCTION SubscriptionDays(
+    start_value DATE,
+    due_value DATE
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN DATEDIFF(due_value, start_value);
+END $$
+
+
+DELIMITER ;
+
+SELECT name,
+       SubscriptionDays(start_date, due_date) AS subscription_days
+FROM customers;
+
+
+
+-- ============================================================
+-- H. TRIGGERS
+-- Q296 - Q300
+-- ============================================================
+
+DELIMITER $$
+
+
+-- Q296. Create an audit table for transactions.
+CREATE TABLE transaction_audit (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    transaction_id INT,
+    customer_id INT,
+    amount DECIMAL(10,2),
+    action_type VARCHAR(20),
+    action_time DATETIME
+) $$
+
+
+-- Q297. Create trigger to record new transactions.
+CREATE TRIGGER after_transaction_insert
+AFTER INSERT ON transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO transaction_audit
+    (
+        transaction_id,
+        customer_id,
+        amount,
+        action_type,
+        action_time
+    )
+    VALUES
+    (
+        NEW.id,
+        NEW.customer_id,
+        NEW.amount,
+        'INSERT',
+        NOW()
+    );
+END $$
+
+
+-- Q298. Insert a test transaction to activate the trigger.
+INSERT INTO transactions
+(
+    customer_id,
+    amount,
+    payment_mode,
+    status,
+    date
+)
+VALUES
+(
+    1,
+    500.00,
+    'UPI',
+    'Success',
+    CURDATE()
+) $$
+
+
+-- Q299. Check the transaction audit table.
+SELECT *
+FROM transaction_audit $$
+
+
+-- Q300. Create a trigger to record transaction updates.
+CREATE TRIGGER after_transaction_update
+AFTER UPDATE ON transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO transaction_audit
+    (
+        transaction_id,
+        customer_id,
+        amount,
+        action_type,
+        action_time
+    )
+    VALUES
+    (
+        NEW.id,
+        NEW.customer_id,
+        NEW.amount,
+        'UPDATE',
+        NOW()
+    );
+END $$
+
+
+DELIMITER ;
+
+
+-- ============================================================
+
+-- ============================================================

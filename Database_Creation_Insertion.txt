@@ -1,0 +1,366 @@
+-- ============================================================
+-- PART 1 : DATABASE CREATION AND DATA INSERTION
+-- PROJECT  : BROADBAND MANAGEMENT SYSTEM
+-- DATABASE : broadband_db
+-- ============================================================
+
+
+-- ============================================================
+-- 1. CREATE DATABASE
+-- ============================================================
+
+DROP DATABASE IF EXISTS broadband_db;
+
+CREATE DATABASE broadband_db;
+
+USE broadband_db;
+
+
+-- ============================================================
+-- 2. CREATE PLANS TABLE
+-- ============================================================
+
+CREATE TABLE plans (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    speed INT NOT NULL,
+    data_limit VARCHAR(50),
+    data_limit_gb DECIMAL(10,2),
+    validity_days INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL
+);
+
+
+-- ============================================================
+-- 3. CREATE CUSTOMERS TABLE
+-- ============================================================
+
+CREATE TABLE customers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    connection_id VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    address VARCHAR(255),
+    plan_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    followed_up BOOLEAN DEFAULT FALSE,
+
+    CONSTRAINT fk_customer_plan
+        FOREIGN KEY (plan_id)
+        REFERENCES plans(id)
+);
+
+
+-- ============================================================
+-- 4. CREATE USERS TABLE
+-- ============================================================
+
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'staff', 'customer') NOT NULL,
+    display_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    customer_id INT NULL,
+
+    CONSTRAINT fk_user_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(id)
+);
+
+
+-- ============================================================
+-- 5. CREATE PASSWORD_RESETS TABLE
+-- ============================================================
+
+CREATE TABLE password_resets (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    otp VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+
+    CONSTRAINT fk_password_reset_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+);
+
+
+-- ============================================================
+-- 6. CREATE USAGE_LOGS TABLE
+-- ============================================================
+
+CREATE TABLE usage_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    usage_date DATE NOT NULL,
+    download_gb DECIMAL(10,2) DEFAULT 0,
+    upload_gb DECIMAL(10,2) DEFAULT 0,
+    total_usage_gb DECIMAL(10,2) DEFAULT 0,
+
+    CONSTRAINT fk_usage_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(id)
+);
+
+
+-- ============================================================
+-- 7. CREATE TRANSACTIONS TABLE
+-- ============================================================
+
+CREATE TABLE transactions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_mode ENUM('Cash', 'UPI', 'Card', 'Net Banking') NOT NULL,
+    status ENUM('Success', 'Pending', 'Failed') NOT NULL,
+    date DATETIME NOT NULL,
+
+    CONSTRAINT fk_transaction_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(id)
+);
+
+
+-- ============================================================
+-- 8. CREATE RENEWAL_ALERT_LOGS TABLE
+-- ============================================================
+
+CREATE TABLE renewal_alert_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    alert_date DATETIME NOT NULL,
+    alert_type VARCHAR(50) NOT NULL,
+    status ENUM('Sent', 'Pending', 'Failed') NOT NULL,
+
+    CONSTRAINT fk_alert_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(id)
+);
+
+
+-- ============================================================
+-- 9. INSERT DATA INTO PLANS
+-- ============================================================
+
+INSERT INTO plans
+(name, speed, data_limit, data_limit_gb, validity_days, price)
+VALUES
+('Home Basic', 50, '500 GB', 500.00, 30, 499.00),
+('Home Plus', 100, '750 GB', 750.00, 30, 699.00),
+('Home Pro Unlimited', 200, 'Unlimited', NULL, 30, 999.00),
+('Home Gamer Ultra', 300, 'Unlimited', NULL, 30, 1499.00),
+('Home Starter', 30, '300 GB', 300.00, 30, 399.00);
+
+
+-- ============================================================
+-- 10. INSERT DATA INTO CUSTOMERS
+-- ============================================================
+
+INSERT INTO customers
+(name, connection_id, email, address, plan_id, start_date, due_date, followed_up)
+VALUES
+('Ravi Kumar', 'BB1001', 'ravi@gmail.com',
+ 'MVP Colony, Visakhapatnam', 1, '2026-01-05', '2026-02-05', TRUE),
+
+('Priya Sharma', 'BB1002', 'priya@gmail.com',
+ 'Gajuwaka, Visakhapatnam', 2, '2026-01-10', '2026-02-10', FALSE),
+
+('Arjun Reddy', 'BB1003', 'arjun@gmail.com',
+ 'Madhurawada, Visakhapatnam', 3, '2026-01-15', '2026-02-15', TRUE),
+
+('Sneha Rao', 'BB1004', 'sneha@gmail.com',
+ 'Dwaraka Nagar, Visakhapatnam', 4, '2026-01-20', '2026-02-20', FALSE),
+
+('Kiran Kumar', 'BB1005', 'kiran@gmail.com',
+ 'Seethammadhara, Visakhapatnam', 5, '2026-01-25', '2026-02-25', TRUE),
+
+('Anjali Devi', 'BB1006', 'anjali@gmail.com',
+ 'Akkayyapalem, Visakhapatnam', 1, '2026-02-01', '2026-03-01', FALSE),
+
+('Rahul Verma', 'BB1007', 'rahul@gmail.com',
+ 'Maddilapalem, Visakhapatnam', 2, '2026-02-05', '2026-03-05', TRUE),
+
+('Pooja Singh', 'BB1008', 'pooja@gmail.com',
+ 'Kancharapalem, Visakhapatnam', 3, '2026-02-10', '2026-03-10', FALSE),
+
+('Vikram Naidu', 'BB1009', 'vikram@gmail.com',
+ 'NAD Junction, Visakhapatnam', 4, '2026-02-15', '2026-03-15', TRUE),
+
+('Divya Rani', 'BB1010', 'divya@gmail.com',
+ 'Rushikonda, Visakhapatnam', 5, '2026-02-20', '2026-03-20', FALSE);
+
+
+-- ============================================================
+-- 11. INSERT DATA INTO USERS
+-- ============================================================
+
+INSERT INTO users
+(username, password_hash, role, display_name, email, customer_id)
+VALUES
+('admin', 'hash_admin_123', 'admin', 'System Admin',
+ 'admin@broadband.com', NULL),
+
+('staff01', 'hash_staff_123', 'staff', 'Support Staff',
+ 'staff@broadband.com', NULL),
+
+('ravi_user', 'hash_ravi_123', 'customer', 'Ravi Kumar',
+ 'ravi@gmail.com', 1),
+
+('priya_user', 'hash_priya_123', 'customer', 'Priya Sharma',
+ 'priya@gmail.com', 2),
+
+('arjun_user', 'hash_arjun_123', 'customer', 'Arjun Reddy',
+ 'arjun@gmail.com', 3),
+
+('sneha_user', 'hash_sneha_123', 'customer', 'Sneha Rao',
+ 'sneha@gmail.com', 4),
+
+('kiran_user', 'hash_kiran_123', 'customer', 'Kiran Kumar',
+ 'kiran@gmail.com', 5),
+
+('anjali_user', 'hash_anjali_123', 'customer', 'Anjali Devi',
+ 'anjali@gmail.com', 6),
+
+('rahul_user', 'hash_rahul_123', 'customer', 'Rahul Verma',
+ 'rahul@gmail.com', 7),
+
+('pooja_user', 'hash_pooja_123', 'customer', 'Pooja Singh',
+ 'pooja@gmail.com', 8);
+
+
+-- ============================================================
+-- 12. INSERT DATA INTO PASSWORD_RESETS
+-- ============================================================
+
+INSERT INTO password_resets
+(user_id, otp, created_at, expires_at)
+VALUES
+(3, '123456', '2026-02-01 10:00:00', '2026-02-01 10:10:00'),
+(4, '234567', '2026-02-02 11:00:00', '2026-02-02 11:10:00'),
+(5, '345678', '2026-02-03 12:00:00', '2026-02-03 12:10:00'),
+(6, '456789', '2026-02-04 13:00:00', '2026-02-04 13:10:00'),
+(7, '567890', '2026-02-05 14:00:00', '2026-02-05 14:10:00');
+
+
+-- ============================================================
+-- 13. INSERT DATA INTO USAGE_LOGS
+-- ============================================================
+
+INSERT INTO usage_logs
+(customer_id, usage_date, download_gb, upload_gb, total_usage_gb)
+VALUES
+(1, '2026-02-01', 20.50, 5.20, 25.70),
+(1, '2026-02-05', 35.20, 8.30, 43.50),
+(1, '2026-02-10', 40.00, 10.00, 50.00),
+
+(2, '2026-02-01', 50.00, 12.00, 62.00),
+(2, '2026-02-05', 65.50, 15.50, 81.00),
+(2, '2026-02-10', 70.00, 18.00, 88.00),
+
+(3, '2026-02-01', 100.00, 25.00, 125.00),
+(3, '2026-02-05', 120.00, 30.00, 150.00),
+(3, '2026-02-10', 150.00, 35.00, 185.00),
+
+(4, '2026-02-01', 180.00, 40.00, 220.00),
+(4, '2026-02-05', 200.00, 45.00, 245.00),
+(4, '2026-02-10', 220.00, 50.00, 270.00),
+
+(5, '2026-02-01', 15.00, 4.00, 19.00),
+(5, '2026-02-05', 25.00, 6.00, 31.00),
+(5, '2026-02-10', 30.00, 7.00, 37.00),
+
+(6, '2026-02-01', 30.00, 7.00, 37.00),
+(6, '2026-02-05', 40.00, 9.00, 49.00),
+
+(7, '2026-02-01', 55.00, 12.00, 67.00),
+(7, '2026-02-05', 60.00, 14.00, 74.00),
+
+(8, '2026-02-01', 130.00, 25.00, 155.00),
+(8, '2026-02-05', 145.00, 30.00, 175.00),
+
+(9, '2026-02-01', 200.00, 40.00, 240.00),
+(9, '2026-02-05', 230.00, 45.00, 275.00),
+
+(10, '2026-02-01', 20.00, 5.00, 25.00),
+(10, '2026-02-05', 28.00, 6.00, 34.00);
+
+
+-- ============================================================
+-- 14. INSERT DATA INTO TRANSACTIONS
+-- ============================================================
+
+INSERT INTO transactions
+(customer_id, amount, payment_mode, status, date)
+VALUES
+(1, 499.00, 'UPI', 'Success', '2026-02-01 09:30:00'),
+(1, 499.00, 'Card', 'Success', '2026-03-01 10:00:00'),
+
+(2, 699.00, 'UPI', 'Success', '2026-02-01 11:00:00'),
+(2, 699.00, 'Cash', 'Pending', '2026-03-01 12:00:00'),
+
+(3, 999.00, 'Card', 'Success', '2026-02-01 13:00:00'),
+(3, 999.00, 'Net Banking', 'Success', '2026-03-01 13:30:00'),
+
+(4, 1499.00, 'UPI', 'Success', '2026-02-01 14:00:00'),
+(4, 1499.00, 'Card', 'Failed', '2026-03-01 14:30:00'),
+
+(5, 399.00, 'Cash', 'Success', '2026-02-01 15:00:00'),
+
+(6, 499.00, 'UPI', 'Success', '2026-03-01 09:00:00'),
+
+(7, 699.00, 'Card', 'Success', '2026-03-01 10:30:00'),
+
+(8, 999.00, 'UPI', 'Pending', '2026-03-01 11:30:00'),
+
+(9, 1499.00, 'Net Banking', 'Success', '2026-03-01 12:30:00'),
+
+(10, 399.00, 'Cash', 'Failed', '2026-03-01 13:30:00');
+
+
+-- ============================================================
+-- 15. INSERT DATA INTO RENEWAL_ALERT_LOGS
+-- ============================================================
+
+INSERT INTO renewal_alert_logs
+(customer_id, alert_date, alert_type, status)
+VALUES
+(1, '2026-02-03 09:00:00', 'Email', 'Sent'),
+(1, '2026-02-04 09:00:00', 'SMS', 'Sent'),
+
+(2, '2026-02-08 10:00:00', 'Email', 'Sent'),
+(2, '2026-02-09 10:00:00', 'SMS', 'Pending'),
+
+(3, '2026-02-13 11:00:00', 'Email', 'Sent'),
+(3, '2026-02-14 11:00:00', 'SMS', 'Sent'),
+
+(4, '2026-02-18 12:00:00', 'Email', 'Sent'),
+(4, '2026-02-19 12:00:00', 'SMS', 'Failed'),
+
+(5, '2026-02-23 13:00:00', 'Email', 'Sent'),
+
+(6, '2026-02-27 09:00:00', 'Email', 'Pending'),
+
+(7, '2026-03-03 10:00:00', 'Email', 'Sent'),
+
+(8, '2026-03-08 11:00:00', 'SMS', 'Sent'),
+
+(9, '2026-03-13 12:00:00', 'Email', 'Sent'),
+
+(10, '2026-03-18 13:00:00', 'SMS', 'Failed');
+
+
+-- ============================================================
+-- PART 1 COMPLETED
+-- ============================================================
+
+-- Tables created:
+-- 1. plans
+-- 2. customers
+-- 3. users
+-- 4. password_resets
+-- 5. usage_logs
+-- 6. transactions
+-- 7. renewal_alert_logs
