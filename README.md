@@ -49,32 +49,40 @@ renewal_alert_logs :Stores renewal notification records
 
 # 🔗 Database Relationships
 
-                    ┌──────────────┐
-                    │    plans     │
+                                       ┌──────────────┐
+                    │    PLANS     │
                     └──────┬───────┘
                            │
-                       plan_id
-                           │
+                         1 │
+                           │ N
                     ┌──────▼───────┐
-                    │  customers   │
-                    └──┬───┬───┬───┘
-                       │   │   │
-             ┌─────────┘   │   └──────────┐
-             │             │              │
-             ▼             ▼              ▼
-       ┌──────────┐  ┌────────────┐  ┌──────────────────┐
-       │  users   │  │usage_logs  │  │renewal_alert_logs│
-       └──────────┘  └────────────┘  └──────────────────┘
-             │
-             │
-             ▼
-       ┌──────────────┐
-       │transactions  │
-       └──────┬───────┘
-              │
-              ▼
-            plans
+                    │  CUSTOMERS   │
+                    └──┬────┬───┬──┘
+                       │    │   │
+                    1  │    │   │  1
+                    N  │    │   │  N
+                       │    │   │
+              ┌────────▼┐   │   └────────────────────┐
+              │TRANSACTIONS│  │                       │
+              └───────────┘  │                       │
+                           1  │                       │
+                           N  │                       │
+                    ┌──────▼───────┐        ┌────────▼────────────┐
+                    │  USAGE_LOGS  │        │ RENEWAL_ALERT_LOGS  │
+                    └──────────────┘        └─────────────────────┘
 
+                           CUSTOMERS
+                              │
+                            1 │
+                              │ N
+                         ┌────▼─────┐
+                         │  USERS   │
+                         └────┬─────┘
+                            1  │
+                            N  │
+                       ┌───────▼────────┐
+                       │PASSWORD_RESETS│
+                       └────────────────┘
 # Primary relationships
 1.
 customers.plan_id
